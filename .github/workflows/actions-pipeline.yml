@@ -27,7 +27,9 @@ jobs:
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
-      - uses: actions/checkout@v4
+      # - uses: actions/checkout@v4
+      - name: Checkout the current repository
+        uses: actions/checkout@v4
 
       # Runs a single command using the runners shell
       - name: Run a one-line script
@@ -39,13 +41,13 @@ jobs:
           echo Add other actions to build,
           echo test, and deploy your project.
 
-      - name: Checkout the repository that triggered the workflow
-        uses: actions/checkout@v3
+      # - name: Checkout the repository that triggered the workflow
+      #   uses: actions/checkout@v3
   
       - name: Checkout another public repository
         uses: actions/checkout@v3
         with:
           repository: kcmchandramouli/java-bank
-          path: .
+          path: java-bank
       - name: ls -la
         run: ls -la
