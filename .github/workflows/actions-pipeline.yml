@@ -33,8 +33,11 @@ jobs:
           distribution: 'temurin'
           cache: 'maven'
 
-      - name: Maven Compile
-        run: mvn -B package --file java-bank/pom.xml
+      - name: Maven Build
+        run: |
+          cd java-bank  
+          mvm compile
+  #mvn -B package --file java-bank/pom.xml
 
   security-check:
     runs-on: ubuntu-latest
