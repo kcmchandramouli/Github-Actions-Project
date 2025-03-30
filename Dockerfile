@@ -6,7 +6,8 @@ RUN ls
 
 ENV APP_HOME /usr/java-bank/src/app
 
-COPY app/*.jar $APP_HOME/app.jar
+# COPY app/*.jar $APP_HOME/app.jar
+COPY *.jar $APP_HOME/app.jar
 
 WORKDIR $APP_HOME
 

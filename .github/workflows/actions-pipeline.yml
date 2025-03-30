@@ -177,5 +177,12 @@ jobs:
         uses: docker/build-push-action@v6
         with:
           push: true
-          tags: kcmchandrramouli/java-bank:latest
+          tags: kcmchandramoulli/java-bank:latest
+
+      # - name: Build & Publish Image
+      #   run: |
+      #     docker login --username ${{ vars.DOCKERHUB_USERNAME }} --password ${{ secrets.DOCKERHUB_TOKEN }} ghcr.io
+      #     docker build . --tag ghcr.io/${{ github.actor }}/kcm-ubuntu:latest
+      #     docker push ghcr.io/${{ github.actor }}/kcm-ubuntu:latest
+
   
