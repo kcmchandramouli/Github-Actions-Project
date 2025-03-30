@@ -15,7 +15,7 @@ on:
 
 jobs:
   maven-compile:
-    runs-on: ubuntu-latest
+    runs-on: self-hoster-linux-x64  #ubuntu-latest
 
     steps:
       - uses: actions/checkout@v4
@@ -40,7 +40,7 @@ jobs:
   #mvn -B package --file java-bank/pom.xml
 
   security-check:
-    runs-on: ubuntu-latest
+    runs-on: self-hoster-linux-x64  #ubuntu-latest
     needs: maven-compile
 
     steps:
