@@ -238,6 +238,8 @@ jobs:
     # needs: docker_build-push
 
     steps:
+    - uses: actions/checkout@v4
+
     - name: Azure Login
       uses: Azure/login@v2.2.0
       with:
@@ -258,7 +260,7 @@ jobs:
         # Provide audience field for access-token. Default value is api://AzureADTokenExchange
         # audience: # optional, default is api://AzureADTokenExchange
         # The type of authentication. Supported values are SERVICE_PRINCIPAL, IDENTITY. Default value is SERVICE_PRINCIPAL
-        auth-type: federated  #SERVICE_PRINCIPAL  # optional, default is SERVICE_PRINCIPAL
+        auth-type: SERVICE_PRINCIPAL  # optional, default is SERVICE_PRINCIPAL
             
     - name: Azure Kubernetes set context
       uses: Azure/aks-set-context@v3
@@ -295,7 +297,10 @@ jobs:
         # string-data: # optional
         # JSON object with the serialized form of the secret data in a base64 encoded string ex: {"key1":"[base64 encoded data]"}
         # data: # optional
-                
+
+    - name: ls
+      run: ls -la
+
     - name: Deploy to Kubernetes cluster
       uses: Azure/k8s-deploy@v4.9
       with:
