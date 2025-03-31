@@ -13,9 +13,9 @@ on:
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
 
-permissions:
-  id-token: write
-  contents: read
+# permissions:
+#   id-token: write
+#   contents: read
 
 jobs:
   # maven-compile:
@@ -234,7 +234,7 @@ jobs:
   #         docker push kcmcicd.azurecr.io/k8sdemo:${{ github.sha }}
 
   deploy_to_AKS:
-    runs-on: ubuntu-latest
+    runs-on: self-hosted  #ubuntu-latest
     # needs: docker_build-push
 
     steps:
