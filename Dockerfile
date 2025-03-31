@@ -6,17 +6,11 @@ EXPOSE 8080
 # Create the application directory
 ENV APP_HOME /usr/java-bank/src/app
 
-# Set the working directory
-WORKDIR /usr/java-bank
+# Copy the JAR file from the correct path to the container
+COPY java-bank/target/*.jar $APP_HOME/app.jar   
+#$APP_HOME/app.jar
 
-# Copy the source code to the container
-COPY . ./
-
-# Build the application
-RUN ./mvnw clean package -DskipTests
-
-# Copy the JAR file to the application directory
-COPY *.jar $APP_HOME/app.jar
+RUN ls -la
 
 # Set the working directory
 WORKDIR $APP_HOME

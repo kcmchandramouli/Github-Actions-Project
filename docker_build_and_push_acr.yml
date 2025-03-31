@@ -1,0 +1,28 @@
+  # Build & Push docker image to Docker Hub
+  # docker_build-push:
+  #   runs-on: ubuntu-latest
+  #   needs: SonarQube-Analysis
+
+  #   steps:
+  #     - uses: actions/checkout@v4
+
+  #     - name: Checkout another public repository
+  #       uses: actions/checkout@v3
+  #       with:
+  #         repository: kcmchandramouli/java-bank
+  #         path: java-bank
+
+  #     - name: Download JAR artifact
+  #       uses: actions/download-artifact@v4
+  #       with:
+  #         name: java-bank-jar
+  #         path: java-bank/target
+  #     - uses: azure/docker-login@v2
+  #       with:
+  #         login-server: kcmcicd.azurecr.io
+  #         username: ${{ secrets.ACR_USERNAME }}
+  #         password: ${{ secrets.ACR_PASSWORD }}
+
+  #     - run: |
+  #         docker build . -t kcmcicd.azurecr.io/k8sdemo:${{ github.sha }}
+  #         docker push kcmcicd.azurecr.io/k8sdemo:${{ github.sha }}
