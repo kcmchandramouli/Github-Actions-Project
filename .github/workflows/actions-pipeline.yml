@@ -258,7 +258,7 @@ jobs:
         # Provide audience field for access-token. Default value is api://AzureADTokenExchange
         # audience: # optional, default is api://AzureADTokenExchange
         # The type of authentication. Supported values are SERVICE_PRINCIPAL, IDENTITY. Default value is SERVICE_PRINCIPAL
-        auth-type: SERVICE_PRINCIPAL  # optional, default is SERVICE_PRINCIPAL
+        auth-type: federated  #SERVICE_PRINCIPAL  # optional, default is SERVICE_PRINCIPAL
             
     - name: Azure Kubernetes set context
       uses: Azure/aks-set-context@v3
