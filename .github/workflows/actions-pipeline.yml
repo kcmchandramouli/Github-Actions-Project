@@ -18,93 +18,93 @@ permissions:
   contents: read
 
 jobs:
-  # maven-compile:
-  #   runs-on: ubuntu-latest
+  maven-compile:
+    runs-on: ubuntu-latest
 
-  #   steps:
-  #     - uses: actions/checkout@v4
+    steps:
+      - uses: actions/checkout@v4
 
-  #     - name: Checkout another public repository
-  #       uses: actions/checkout@v3
-  #       with:
-  #         repository: kcmchandramouli/java-bank
-  #         path: java-bank
+      - name: Checkout another public repository
+        uses: actions/checkout@v3
+        with:
+          repository: kcmchandramouli/java-bank
+          path: java-bank
 
-  #     - name: setup JDK 17
-  #       uses: actions/setup-java@v3
-  #       with:
-  #         java-version: '17'
-  #         distribution: 'temurin'
-  #         cache: 'maven'
+      - name: setup JDK 17
+        uses: actions/setup-java@v3
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+          cache: 'maven'
 
-  #     - name: Maven Build
-  #       run: |
-  #         cd java-bank  
-  #         mvn compile
-  # #mvn -B package --file java-bank/pom.xml
+      - name: Maven Build
+        run: |
+          cd java-bank  
+          mvn compile
+  #mvn -B package --file java-bank/pom.xml
 
-  # security-check:
-  #   runs-on: ubuntu-latest
-  #   needs: maven-compile
+  security-check:
+    runs-on: ubuntu-latest
+    needs: maven-compile
 
-  #   steps:
-  #     - uses: actions/checkout@v4
+    steps:
+      - uses: actions/checkout@v4
 
-  #     - name: Checkout another public repository
-  #       uses: actions/checkout@v3
-  #       with:
-  #         repository: kcmchandramouli/java-bank
-  #         path: java-bank
+      - name: Checkout another public repository
+        uses: actions/checkout@v3
+        with:
+          repository: kcmchandramouli/java-bank
+          path: java-bank
 
-  #     - name: Trivy Installation
-  #       run: |
-  #         sudo apt-get install wget apt-transport-https gnupg lsb-release -y
-  #         wget -qO - https://aquasecurity.github.io/trivy-repo/deb/public.key | sudo apt-key add -
-  #         echo deb https://aquasecurity.github.io/trivy-repo/deb $(lsb_release -sc) main | sudo tee -a /etc/apt/sources.list.d/trivy.list
-  #         sudo apt-get update -y
-  #         sudo apt-get install trivy -y
+      - name: Trivy Installation
+        run: |
+          sudo apt-get install wget apt-transport-https gnupg lsb-release -y
+          wget -qO - https://aquasecurity.github.io/trivy-repo/deb/public.key | sudo apt-key add -
+          echo deb https://aquasecurity.github.io/trivy-repo/deb $(lsb_release -sc) main | sudo tee -a /etc/apt/sources.list.d/trivy.list
+          sudo apt-get update -y
+          sudo apt-get install trivy -y
 
-  #     - name: Trivy Fs Scan
-  #       run: trivy fs --format table -o fs-report.json .
+      - name: Trivy Fs Scan
+        run: trivy fs --format table -o fs-report.json .
 
-  #     - name: Gitleaks Installation
-  #       run: sudo apt-get install gitleaks -y
+      - name: Gitleaks Installation
+        run: sudo apt-get install gitleaks -y
 
-  #     - name: Gitleaks Code Scan
-  #       run: gitleaks detect --source . -r gitileaks-report.json --report-format json -f json
+      - name: Gitleaks Code Scan
+        run: gitleaks detect --source . -r gitileaks-report.json --report-format json -f json
 
-  # maven-test:
-  #   runs-on: ubuntu-latest
-  #   needs: maven-compile
+  maven-test:
+    runs-on: ubuntu-latest
+    needs: maven-compile
 
-  #   steps:
-  #     - uses: actions/checkout@v4
+    steps:
+      - uses: actions/checkout@v4
 
-  #     - name: Checkout another public repository
-  #       uses: actions/checkout@v3
-  #       with:
-  #         repository: kcmchandramouli/java-bank
-  #         path: java-bank
+      - name: Checkout another public repository
+        uses: actions/checkout@v3
+        with:
+          repository: kcmchandramouli/java-bank
+          path: java-bank
 
-  #     - name: setup JDK 17
-  #       uses: actions/setup-java@v3
-  #       with:
-  #         java-version: '17'
-  #         distribution: 'temurin'
-  #         cache: 'maven'
+      - name: setup JDK 17
+        uses: actions/setup-java@v3
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+          cache: 'maven'
 
-  #     - name: Gitleaks Installation
-  #       run: sudo apt-get install maven -y
+      - name: Gitleaks Installation
+        run: sudo apt-get install maven -y
 
-  #     - name: Maven unit test
-  #       run: |
-  #         cd java-bank  
-  #         mvn test
+      - name: Maven unit test
+        run: |
+          cd java-bank  
+          mvn test
 
   # Build & Push docker image to Docker Hub
   docker_build-push:
     runs-on: ubuntu-latest
-    # needs: maven-test
+    needs: maven-test
 
     steps:
       - uses: actions/checkout@v4
@@ -176,153 +176,66 @@ jobs:
           push: true
           tags: kcmchandramoulli/java-bank:latest
 
-  # deploy_to_AKS:
-  #   runs-on: self-hosted  #ubuntu-latest
-  #   needs: docker_build-push
+  deploy_to_AKS:
+    runs-on: self-hosted  #ubuntu-latest
+    needs: docker_build-push
 
-  #   steps:
-  #   - uses: actions/checkout@v4
+    steps:
+    - uses: actions/checkout@v4
 
-  #   - name: Azure Login
-  #     uses: Azure/login@v2.2.0
-  #     with:
-  #       # Paste output of `az ad sp create-for-rbac` as value of secret variable: AZURE_CREDENTIALS
-  #       # creds: # optional
-  #       # ClientId of the Azure Service principal created.
-  #       client-id: ${{ secrets.AZURE_CLIENT_ID }}  # optional
-  #       # TenantId of the Azure Service principal created.
-  #       tenant-id: ${{ secrets.AZURE_TENANT_ID }}  # optional
-  #       # Azure subscriptionId
-  #       subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}  # optional
-  #       # Set this value to true to enable Azure PowerShell Login in addition to Azure CLI login
-  #       # enable-AzPSSession: # optional
-  #       # Name of the environment. Supported values are azurecloud, azurestack, azureusgovernment, azurechinacloud, azuregermancloud. Default being azurecloud
-  #       # environment: # optional, default is azurecloud
-  #       # Set this value to true to enable support for accessing tenants without subscriptions
-  #       # allow-no-subscriptions: # optional
-  #       # Provide audience field for access-token. Default value is api://AzureADTokenExchange
-  #       # audience: # optional, default is api://AzureADTokenExchange
-  #       # The type of authentication. Supported values are SERVICE_PRINCIPAL, IDENTITY. Default value is SERVICE_PRINCIPAL
-  #       auth-type: SERVICE_PRINCIPAL  # optional, default is SERVICE_PRINCIPAL
+    - name: Azure Login
+      uses: Azure/login@v2.2.0
+      with:
+        # Paste output of `az ad sp create-for-rbac` as value of secret variable: AZURE_CREDENTIALS
+        # creds: # optional
+        # ClientId of the Azure Service principal created.
+        client-id: ${{ secrets.AZURE_CLIENT_ID }}  # optional
+        # TenantId of the Azure Service principal created.
+        tenant-id: ${{ secrets.AZURE_TENANT_ID }}  # optional
+        # Azure subscriptionId
+        subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}  # optional
+        auth-type: SERVICE_PRINCIPAL  # optional, default is SERVICE_PRINCIPAL
             
-  #   - name: Azure Kubernetes set context
-  #     uses: Azure/aks-set-context@v3
-  #     with:
-  #       # Resource Group Name
-  #       resource-group: kcm-cicd
-  #       # AKS Cluster Name
-  #       cluster-name: demo1
-  #       # # AKS Cluster Subscription
-  #       # subscription: # optional
-  #       # # Get cluster admin credentials. Values: true or false
-  #       # admin: # optional
-  #       # # Enables kubelogin for non-admin user scenario. Values: true or false
-  #       # use-kubelogin: # optional
+    - name: Azure Kubernetes set context
+      uses: Azure/aks-set-context@v3
+      with:
+        # Resource Group Name
+        resource-group: kcm-cicd
+        # AKS Cluster Name
+        cluster-name: demo1
+        # # AKS Cluster Subscription
+        # subscription: # optional
+        # # Get cluster admin credentials. Values: true or false
+        # admin: # optional
+        # # Enables kubelogin for non-admin user scenario. Values: true or false
+        # use-kubelogin: # optional
 
-  #   - name: Create secret in Kubernetes cluster
-  #     uses: Azure/k8s-create-secret@v4.0
-  #     with:
-  #       # Choose the target Kubernetes namespace. If the namespace is not provided, the commands will run in the default namespace.
-  #       # namespace: # optional
-  #       # Type of Kubernetes secret. Defaults to 'kubernetes.io/dockerconfigjson'.
-  #       secret-type: docker-registry # optional, default is kubernetes.io/dockerconfigjson
-  #       # Name of the secret. You can use this secret name in the Kubernetes YAML configuration file.
-  #       secret-name: docker-image-pull-secret
-  #       # Container Registry URL
-  #       container-registry-url: https://index.docker.io/v1/ # optional
-  #       # Container Registry user name
-  #       container-registry-username: ${{ vars.DOCKERHUB_USERNAME }} # optional
-  #       # Container Registry password
-  #       container-registry-password: ${{ secrets.DOCKERHUB_TOKEN }} # optional
-  #       # Container Registry email (optional even when using url,username,password)
-  #       # container-registry-email: # optional
-  #       # JSON object with plaintext string data for secret ex: {"key1":"value1"}
-  #       # string-data: # optional
-  #       # JSON object with the serialized form of the secret data in a base64 encoded string ex: {"key1":"[base64 encoded data]"}
-  #       # data: # optional
+    - name: Create secret in Kubernetes cluster
+      uses: Azure/k8s-create-secret@v4.0
+      with:
+        # Choose the target Kubernetes namespace. If the namespace is not provided, the commands will run in the default namespace.
+        # namespace: # optional
+        # Type of Kubernetes secret. Defaults to 'kubernetes.io/dockerconfigjson'.
+        secret-type: docker-registry # optional, default is kubernetes.io/dockerconfigjson
+        # Name of the secret. You can use this secret name in the Kubernetes YAML configuration file.
+        secret-name: docker-image-pull-secret
+        # Container Registry URL
+        container-registry-url: https://index.docker.io/v1/ # optional
+        container-registry-username: ${{ vars.DOCKERHUB_USERNAME }} # optional
+        container-registry-password: ${{ secrets.DOCKERHUB_TOKEN }} # optional
 
-  #   - name: ls
-  #     run: ls -la
+    - name: ls
+      run: ls -la
 
-  #   - name: Set up kubectl
-  #     uses: azure/setup-kubectl@v4
-  #     with:
-  #       version: 'latest' # You can specify a specific version like 'v1.25.0'
+    - name: Set up kubectl
+      uses: azure/setup-kubectl@v4
+      with:
+        version: latest
 
-  #   - name: Deploy to Kubernetes cluster
-  #     uses: Azure/k8s-deploy@v4.9
-  #     with:
-  #       # Choose the target Kubernetes namespace. If the namespace is not provided, the commands will run in the default namespace.
-  #       # namespace: # optional, default is default
-  #       # Path to the manifest files which will be used for deployment.
-  #       manifests: ds.yml
-  #       # Fully qualified resource URL of the image(s) to be used for substitutions on the manifest files Example: contosodemo.azurecr.io/helloworld:test
-  #       images: kcmchandramoulli/java-bank:latest # optional
-  #       # Name of a docker-registry secret that has already been set up within the cluster. Each of these secret names are added under imagePullSecrets field for the workloads found in the input manifest files
-  #       imagepullsecrets: docker-image-pull-secret  # optional
-  #       # Switch whether to pull the images from the registry before deployment to find out Dockerfile's path in order to add it to the annotations
-  #       # pull-images: # optional, default is true
-  #       # Deployment strategy to be used. Allowed values are basic, canary and blue-green
-  #       # strategy: # default is basic
-  #       # Route based on service, ingress or SMI for blue-green strategy
-  #       # route-method: # optional, default is service
-  #       # Indicates the buffer time in minutes before the switch is made to the green version (max is 300 min ie. 5hrs)
-  #       # version-switch-buffer: # optional, default is 0
-  #       # Traffic split method to be used. Allowed values are pod and smi
-  #       # traffic-split-method: # optional, default is pod
-  #       # Annotations in the form of key/value pair to be added to TrafficSplit. Relevant only if deployement strategy is blue-green or canary
-  #       # traffic-split-annotations: # optional
-  #       # Baseline and canary replicas count. Valid value between 0 to 100 (inclusive)
-  #       # baseline-and-canary-replicas: # optional, default is 
-  #       # Percentage of traffic redirect to canary deployment
-  #       # percentage: # optional, default is 0
-  #       # deploy, promote, or reject
-  #       action: deploy  # default is deploy
-  #       # Deploy when a previous deployment already exists. If true then --force argument is added to the apply command
-  #       # force: # optional
-  #       # Github token
-  #       # token: # default is ${{ github.token }}
-  #       # Annotate the target namespace
-  #       # annotate-namespace: # optional, default is true
-  #       # True if cluster is AKS private cluster
-  #       # private-cluster: # optional
-  #       # Name of resource group - Only required if using private cluster
-  #       # resource-group: # optional
-  #       # Resource group name - Only required if using private cluster
-  #       # name: # optional
-  #       # True if the insecure-skip-tls-verify option should be used. Input should be 'true' or 'false'.
-  #       # skip-tls-verify: # optional
-                              
-
-  #     # - name: Checkout repository
-  #     #   uses: actions/checkout@v4
-
-  #     # - uses: azure/setup-kubectl@v4
-  #     #   with:
-  #     #      version: latest # default is latest stable
-  #     #   id: install
-
-  #     # - name: kubectl version check
-  #     #   run: kubectl version --client
-
-  #     # # - name: Set up Azure Kubernetes Service (AKS)
-  #     # #   uses: azure/aks-set-context@v2
-  #     # #   with:
-  #     # #     creds: ${{ secrets.AZURE_CREDENTIALS }}
-  #     # #     cluster-name: ${{ vars.AKS_CLUSTER_NAME }}
-  #     # #     resource-group: ${{ vars.AKS_RESOURCE_GROUP }}
-
-  #     # - uses: azure/login@v2
-  #     #   with:
-  #     #       client-id: ${{ secrets.AZURE_CLIENT_ID }}
-  #     #       tenant-id: ${{ secrets.AZURE_TENANT_ID }}
-  #     #       subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
-    
-  #     # - uses: azure/aks-set-context@v4
-  #     #   with:
-  #     #     resource-group: CICD
-  #     #     cluster-name: default
-
-  #     # - name: Deploy to AKS
-  #     #   run: |
-  #     #     kubectl apply -f ds.yml
+    - name: Deploy to Kubernetes cluster
+      uses: Azure/k8s-deploy@v4.9
+      with:
+        manifests: ds.yml
+        images: kcmchandramoulli/java-bank:latest
+        imagepullsecrets: docker-image-pull-secret
+        action: deploy
