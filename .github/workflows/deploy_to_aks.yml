@@ -1,0 +1,64 @@
+
+  deploy_to_AKS:
+    runs-on: self-hosted  #ubuntu-latest
+    needs: docker_build-push
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Azure Login
+      uses: Azure/login@v2.2.0
+      with:
+        # Paste output of `az ad sp create-for-rbac` as value of secret variable: AZURE_CREDENTIALS
+        # creds: # optional
+        # ClientId of the Azure Service principal created.
+        client-id: ${{ secrets.AZURE_CLIENT_ID }}  # optional
+        # TenantId of the Azure Service principal created.
+        tenant-id: ${{ secrets.AZURE_TENANT_ID }}  # optional
+        # Azure subscriptionId
+        subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}  # optional
+        auth-type: SERVICE_PRINCIPAL  # optional, default is SERVICE_PRINCIPAL
+            
+    - name: Azure Kubernetes set context
+      uses: Azure/aks-set-context@v3
+      with:
+        # Resource Group Name
+        resource-group: kcm-cicd
+        # AKS Cluster Name
+        cluster-name: demo1
+        # # AKS Cluster Subscription
+        # subscription: # optional
+        # # Get cluster admin credentials. Values: true or false
+        # admin: # optional
+        # # Enables kubelogin for non-admin user scenario. Values: true or false
+        # use-kubelogin: # optional
+
+    - name: Create secret in Kubernetes cluster
+      uses: Azure/k8s-create-secret@v4.0
+      with:
+        # Choose the target Kubernetes namespace. If the namespace is not provided, the commands will run in the default namespace.
+        # namespace: # optional
+        # Type of Kubernetes secret. Defaults to 'kubernetes.io/dockerconfigjson'.
+        secret-type: docker-registry # optional, default is kubernetes.io/dockerconfigjson
+        # Name of the secret. You can use this secret name in the Kubernetes YAML configuration file.
+        secret-name: docker-image-pull-secret
+        # Container Registry URL
+        container-registry-url: https://index.docker.io/v1/ # optional
+        container-registry-username: ${{ vars.DOCKERHUB_USERNAME }} # optional
+        container-registry-password: ${{ secrets.DOCKERHUB_TOKEN }} # optional
+
+    - name: ls
+      run: ls -la
+
+    - name: Set up kubectl
+      uses: azure/setup-kubectl@v4
+      with:
+        version: latest
+
+    - name: Deploy to Kubernetes cluster
+      uses: Azure/k8s-deploy@v4.9
+      with:
+        manifests: ds.yml
+        images: kcmchandramoulli/java-bank:latest
+        imagepullsecrets: docker-image-pull-secret
+        action: deploy
