@@ -55,7 +55,7 @@ spec:
     spec:
       containers:
       - name: bankapp
-        image: ${{ secrets.ACR_URL }}/java-bank:latest  #kcmchandramoulli/java-bank:latest  #image from docker hub
+        image: kcmcicdactions.azurecr.io/java-bank:latest  #kcmchandramoulli/java-bank:latest  #image from docker hub
         ports:
         - containerPort: 8080
         env:
