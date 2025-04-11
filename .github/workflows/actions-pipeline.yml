@@ -153,12 +153,15 @@ jobs:
           cd target
           ls -la
 
-      - name: Build Docker Image
-        uses: docker/build-push-action@v6
-        with:
-          context: .
-          push: false
-          tags: kcmchandramoulli/java-bank:latest
+      # - name: Build Docker Image
+      #   uses: docker/build-push-action@v6
+      #   with:
+      #     context: .
+      #     push: false
+      #     tags: kcmchandramoulli/java-bank:latest
+      - name: Docker Build
+        run: |
+          docker build -t kcmchandramoulli/java-bank:latest .
 
       - name: Trivy Installation
         run: |
@@ -171,11 +174,14 @@ jobs:
       - name: Trivy image Scan
         run: trivy image --format table -o image-report.html kcmchandramoulli/java-bank:latest
 
-      - name: Push Docker Image
-        uses: docker/build-push-action@v6
-        with:
-          push: true
-          tags: kcmchandramoulli/java-bank:latest
+      # - name: Push Docker Image
+      #   uses: docker/build-push-action@v6
+      #   with:
+      #     push: true
+      #     tags: kcmchandramoulli/java-bank:latest
+      - name: Docker Push
+        run: |
+          docker push kcmchandramoulli/java-bank:latest
 
   #     - name: ACR Login
   #       uses: azure/docker-login@v1
