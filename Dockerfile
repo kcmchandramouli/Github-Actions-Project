@@ -11,7 +11,8 @@
 # CMD ["java", "-jar", "app.jar"]
 
 # Use Eclipse Temurin JDK 17 as the base image
-FROM eclipse-temurin:17-jdk-alpine
+# FROM eclipse-temurin:17-jdk-alpine
+FROM openjdk:17-alpine
 
 # Expose the application port
 EXPOSE 8080
