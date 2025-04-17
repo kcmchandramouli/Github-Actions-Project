@@ -1,4 +1,4 @@
-name: CI
+name: End to End CI/CD for Goldencat Bank
 
 on:
   push:
