@@ -156,15 +156,15 @@ jobs:
       - name: Trivy image Scan
         run: trivy image --format table -o image-report.html kcmchandramoulli/java-bank:latest
 
-      # - name: Push Docker Image
-      #   uses: docker/build-push-action@v6
-      #   with:
-      #     push: true
-      #     tags: kcmchandramoulli/java-bank:latest
+      - name: Push Docker Image
+        uses: docker/build-push-action@v6
+        with:
+          push: true
+          tags: kcmchandramoulli/java-bank:latest
 
-      - name: Docker Push
-        run: |
-          docker push kcmchandramoulli/java-bank:latest
+      # - name: Docker Push
+      #   run: |
+      #     docker push kcmchandramoulli/java-bank:latest
 
   # Push Docker Image to ACR
   #     - name: ACR Login
