@@ -1,2 +1,2 @@
-# Github-Actions-Project
-This repo contains only CICD for java based banking application.
+# java-bank
+This is  a repo contains opensource java based source code for banking application

@@ -71,20 +71,30 @@ jobs:
       - name: Gitleaks Code Scan
         run: gitleaks detect --source . -r gitileaks-report.json --report-format json -f json
 
-      - name: ls -la
-        run: ls -la
-
-      - name: Upload JAR artifact
+      - name: Upload file-system artifact
         uses: actions/upload-artifact@v4
         with:
           name: Trivy-fs-report
           path: fs-report.json
 
-      - name: Upload JAR artifact
+      - name: Upload Gitileaks artifact
         uses: actions/upload-artifact@v4
         with:
           name: Gitileaks-report
           path: gitileaks-report.json
+
+      - name: Add Reports to Summary
+        run: |
+          echo "### Security Scan Reports" >> $GITHUB_STEP_SUMMARY
+          echo "- [Download Trivy Report](./artifacts/Trivy-fs-report)" >> $GITHUB_STEP_SUMMARY
+          echo "- [Download Gitleaks Report](./artifacts/Gitileaks-report)" >> $GITHUB_STEP_SUMMARY
+      
+      - name: Display Trivy Report in Summary
+        run: |
+          echo "### Trivy File System Scan Report" >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
+          cat fs-report.json >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
 
   maven-test:
     runs-on: ubuntu-latest
@@ -167,6 +177,12 @@ jobs:
   
       - name: Trivy image Scan
         run: trivy image --format table -o image-report.html kcmchandramoulli/java-bank:latest
+
+      - name: Upload Docker image artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: Trivy-Docker-image-report
+          path: image-report.html
 
       # - name: Push Docker Image
       #   uses: docker/build-push-action@v6
