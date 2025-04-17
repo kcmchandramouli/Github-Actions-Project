@@ -1,4 +1,4 @@
-name: CI
+name: End to End CI/CD for Goldencat Bank
 
 on:
   push:
@@ -12,6 +12,17 @@ on:
 
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
+    inputs:
+      is_push_image:
+        description: "Do you want to push Docker image to Docker Hub ?"
+        required: true
+        default: true
+        type: boolean
+      is_deploy_image:
+        description: "Do you want to deploy Docker image to AKS ?"
+        required: true
+        default: false
+        type: boolean
 
 permissions:
   id-token: write
@@ -24,12 +35,6 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Checkout another public repository
-        uses: actions/checkout@v3
-        with:
-          repository: kcmchandramouli/java-bank
-          path: java-bank
-
       - name: setup JDK 17
         uses: actions/setup-java@v3
         with:
@@ -41,7 +46,6 @@ jobs:
         run: |
           cd java-bank  
           mvn compile
-  #mvn -B package --file java-bank/pom.xml
 
   security-check:
     runs-on: ubuntu-latest
@@ -49,12 +53,6 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
-
-      - name: Checkout another public repository
-        uses: actions/checkout@v3
-        with:
-          repository: kcmchandramouli/java-bank
-          path: java-bank
 
       - name: Trivy Installation
         run: |
@@ -73,18 +71,31 @@ jobs:
       - name: Gitleaks Code Scan
         run: gitleaks detect --source . -r gitileaks-report.json --report-format json -f json
 
+      - name: Upload file-system artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: Trivy-fs-report
+          path: fs-report.json
+
+      - name: Upload Gitileaks artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: Gitileaks-report
+          path: gitileaks-report.json
+
+      - name: Display Trivy File System Report in Summary
+        run: |
+          echo "### Trivy File System Scan Report" >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
+          cat fs-report.json >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
+
   maven-test:
     runs-on: ubuntu-latest
-    needs: maven-compile
+    needs: security-check
 
     steps:
       - uses: actions/checkout@v4
-
-      - name: Checkout another public repository
-        uses: actions/checkout@v3
-        with:
-          repository: kcmchandramouli/java-bank
-          path: java-bank
 
       - name: setup JDK 17
         uses: actions/setup-java@v3
@@ -109,12 +120,6 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Checkout another public repository
-        uses: actions/checkout@v3
-        with:
-          repository: kcmchandramouli/java-bank
-          path: java-bank
-
       - name: setup JDK 17
         uses: actions/setup-java@v3
         with:
@@ -125,13 +130,13 @@ jobs:
       - name: Maven Build & package
         run: |
           cd java-bank  
-          mvn package
+          mvn clean package
 
-      # - name: Download JAR artifact
-      #   uses: actions/download-artifact@v4
-      #   with:
-      #     name: java-bank-jar
-      #     path: . #java-bank/target
+      - name: Upload JAR artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: java-bank-jar
+          path: java-bank/target/*.jar
 
       - name: Login to Docker Hub
         uses: docker/login-action@v3
@@ -145,19 +150,16 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
-      - name: ls
-        run: |
-          ls -la
-          cd java-bank
-          ls -la
-          cd target
-          ls -la
+      # - name: Build Docker Image
+      #   uses: docker/build-push-action@v6
+      #   with:
+      #     context: .
+      #     push: false
+      #     tags: kcmchandramoulli/java-bank:latest
 
-      - name: Build Docker Image
-        uses: docker/build-push-action@v6
-        with:
-          push: false
-          tags: kcmchandramoulli/java-bank:latest
+      - name: Docker Build
+        run: |
+          docker build -t kcmchandramoulli/java-bank:latest .
 
       - name: Trivy Installation
         run: |
@@ -170,14 +172,44 @@ jobs:
       - name: Trivy image Scan
         run: trivy image --format table -o image-report.html kcmchandramoulli/java-bank:latest
 
-      - name: Push Docker Image
-        uses: docker/build-push-action@v6
+      - name: Upload Docker image artifact
+        uses: actions/upload-artifact@v4
         with:
-          push: true
-          tags: kcmchandramoulli/java-bank:latest
+          name: Trivy-Docker-image-report
+          path: image-report.html
+
+      - name: Display Trivy Image Scan Report in Summary
+        run: |
+          echo "### Trivy Image Scan Report" >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
+          cat image-report.html >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
+
+      # - name: Push Docker Image
+      #   uses: docker/build-push-action@v6
+      #   with:
+      #     push: true
+      #     tags: kcmchandramoulli/java-bank:latest
+
+      - name: Docker Push
+        run: |
+          docker push kcmchandramoulli/java-bank:latest
+
+  # Push Docker Image to ACR
+  #     - name: ACR Login
+  #       uses: azure/docker-login@v1
+  #       with:
+  #         login-server: ${{ secrets.ACR_URL }}
+  #         username: ${{ secrets.ACR_USERNAME }}
+  #         password: ${{ secrets.ACR_PASSWORD }}
+
+  #     - name: Build and Push Docker Image to ACR
+  #       run: |
+  #         docker build . -t ${{ secrets.ACR_URL }}/java-bank:latest
+  #         docker push ${{ secrets.ACR_URL }}/java-bank:latest
 
   deploy_to_AKS:
-    runs-on: self-hosted  #ubuntu-latest
+    runs-on: ubuntu-latest
     needs: docker_build-push
 
     steps:
@@ -200,9 +232,9 @@ jobs:
       uses: Azure/aks-set-context@v3
       with:
         # Resource Group Name
-        resource-group: kcm-cicd
+        resource-group: cicd-actions
         # AKS Cluster Name
-        cluster-name: demo1
+        cluster-name: cicd-actions-aks
         # # AKS Cluster Subscription
         # subscription: # optional
         # # Get cluster admin credentials. Values: true or false
@@ -221,11 +253,8 @@ jobs:
         secret-name: docker-image-pull-secret
         # Container Registry URL
         container-registry-url: https://index.docker.io/v1/ # optional
-        container-registry-username: ${{ vars.DOCKERHUB_USERNAME }} # optional
-        container-registry-password: ${{ secrets.DOCKERHUB_TOKEN }} # optional
-
-    - name: ls
-      run: ls -la
+        container-registry-username: ${{ vars.DOCKERHUB_USERNAME }} #${{ secrets.ACR_USERNAME }}  #${{ vars.DOCKERHUB_USERNAME }} # optional
+        container-registry-password: ${{ secrets.DOCKERHUB_TOKEN }} #${{ secrets.ACR_PASSWORD }}  #${{ secrets.DOCKERHUB_TOKEN }} # optional
 
     - name: Set up kubectl
       uses: azure/setup-kubectl@v4
