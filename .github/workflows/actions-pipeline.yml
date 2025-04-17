@@ -21,7 +21,7 @@ on:
       is_deploy_image:
         description: "Do you want to deploy Docker image to AKS ?"
         required: true
-        default: false
+        default: true #false
         type: boolean
 
 permissions:
@@ -134,16 +134,16 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
-      - name: Build Docker Image
-        uses: docker/build-push-action@v6
-        with:
-          context: .
-          push: false
-          tags: kcmchandramoulli/java-bank:latest
+      # - name: Build Docker Image
+      #   uses: docker/build-push-action@v6
+      #   with:
+      #     context: .
+      #     push: false
+      #     tags: kcmchandramoulli/java-bank:latest
 
-      # - name: Docker Build
-      #   run: |
-      #     docker build -t kcmchandramoulli/java-bank:latest .
+      - name: Docker Build
+        run: |
+          docker build -t kcmchandramoulli/java-bank:latest .
 
       - name: Trivy Installation
         run: |
@@ -156,15 +156,15 @@ jobs:
       - name: Trivy image Scan
         run: trivy image --format table -o image-report.html kcmchandramoulli/java-bank:latest
 
-      - name: Push Docker Image
-        uses: docker/build-push-action@v6
-        with:
-          push: true
-          tags: kcmchandramoulli/java-bank:latest
+      # - name: Push Docker Image
+      #   uses: docker/build-push-action@v6
+      #   with:
+      #     push: true
+      #     tags: kcmchandramoulli/java-bank:latest
 
-      # - name: Docker Push
-      #   run: |
-      #     docker push kcmchandramoulli/java-bank:latest
+      - name: Docker Push
+        run: |
+          docker push kcmchandramoulli/java-bank:latest
 
   # Push Docker Image to ACR
   #     - name: ACR Login
