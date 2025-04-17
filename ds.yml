@@ -55,7 +55,7 @@ spec:
     spec:
       containers:
       - name: bankapp
-        image: kcmcicdactions.azurecr.io/java-bank:latest  #kcmchandramoulli/java-bank:latest  #image from docker hub
+        image: kcmchandramoulli/java-bank:latest  #image from docker hub
         ports:
         - containerPort: 8080
         env:
